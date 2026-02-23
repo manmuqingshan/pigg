@@ -82,7 +82,7 @@ wayland-sys = { version = "0.31.8", features = ["dlopen"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 tempfile = "3"
-serial_test = "3.3.1"
+serial_test = "3.4.0"
 sysinfo = { version = "0.38" }
 
 [dev-dependencies] # For tests
