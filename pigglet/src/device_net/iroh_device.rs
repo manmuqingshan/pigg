@@ -1,6 +1,6 @@
 use anyhow::{anyhow, bail};
 use iroh::endpoint::Connection;
-use iroh::{Endpoint, EndpointId, RelayMode, RelayUrl, SecretKey};
+use iroh::{endpoint::presets, Endpoint, EndpointId, RelayMode, RelayUrl, SecretKey};
 use log::{debug, info, trace};
 use pigdef::config::HardwareConfig;
 use pigdef::config::HardwareConfigMessage::{IOLevelChanged, NewConfig, NewPinConfig};
@@ -53,7 +53,7 @@ pub async fn get_device() -> anyhow::Result<IrohDevice> {
     // connections between nodes when there are NATs or firewalls preventing direct connections.
     // If no direct connection can be made, packets are relayed over the relay servers.
     #[allow(unused_mut)]
-    let mut builder = Endpoint::builder()
+    let mut builder = Endpoint::builder(presets::N0)
         // The secret key is used to authenticate with other nodes.
         // The PublicKey portion of this secret key is how we identify nodes, often referred
         // to as the `node_id` in our codebase.

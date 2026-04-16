@@ -1,8 +1,8 @@
 use anyhow::ensure;
 use iroh::endpoint::VarInt;
 use iroh::{
-    endpoint::Connection, Endpoint, EndpointAddr, EndpointId, RelayMode, RelayUrl, SecretKey,
-    TransportAddr,
+    endpoint::{presets, Connection},
+    Endpoint, EndpointAddr, EndpointId, RelayMode, RelayUrl, SecretKey, TransportAddr,
 };
 use pigdef::config::HardwareConfigMessage::Disconnect;
 use pigdef::config::{HardwareConfig, HardwareConfigMessage};
@@ -48,7 +48,7 @@ pub async fn connect(
     let secret_key = SecretKey::generate(&mut rand::rng());
 
     // Build an `Endpoint`, which uses PublicKeys as node identifiers
-    let endpoint = Endpoint::builder()
+    let endpoint = Endpoint::builder(presets::N0)
         // The secret key is used to authenticate with other nodes.
         .secret_key(secret_key)
         // Set the ALPN protocols this endpoint will accept on incoming connections
