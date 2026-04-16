@@ -255,7 +255,7 @@ pub async fn connect_and_test_iroh<F, Fut>(
 
     while failures < 3 {
         match iroh_host::connect(endpoint_id, &relay_url).await {
-            Ok((hw_desc, hw_config, connection)) => {
+            Ok((hw_desc, hw_config, connection, _endpoint)) => {
                 if !hw_desc.details.model.contains("Fake") {
                     fail(child, "Didn't connect to fake hardware pigglet")
                 } else {
