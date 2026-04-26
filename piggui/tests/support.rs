@@ -253,7 +253,7 @@ pub async fn connect_and_test_iroh<F, Fut>(
 {
     let mut failures = 0;
 
-    while failures < 3 {
+    while failures < 10 {
         match iroh_host::connect(endpoint_id, &relay_url).await {
             Ok((hw_desc, hw_config, connection, _endpoint)) => {
                 if !hw_desc.details.model.contains("Fake") {
@@ -265,7 +265,7 @@ pub async fn connect_and_test_iroh<F, Fut>(
             }
             _ => {
                 failures += 1;
-                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
             }
         }
     }
