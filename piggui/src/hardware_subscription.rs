@@ -242,7 +242,12 @@ pub fn subscribe() -> impl Stream<Item = SubscriptionEvent> {
                             #[cfg(feature = "iroh")]
                             Iroh(endpoint_id, relay) => {
                                 match iroh_host::connect(&endpoint_id, &relay).await {
-                                    Ok((hardware_description, hardware_config, connection, endpoint)) => {
+                                    Ok((
+                                        hardware_description,
+                                        hardware_config,
+                                        connection,
+                                        endpoint,
+                                    )) => {
                                         // Send the sender back to the GUI
                                         if let Err(e) = gui_sender_clone
                                             .send(SubscriptionEvent::Connected(
