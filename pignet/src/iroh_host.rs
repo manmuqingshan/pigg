@@ -1,8 +1,8 @@
 use anyhow::ensure;
 use iroh::endpoint::VarInt;
 use iroh::{
-    endpoint::Connection, Endpoint, EndpointAddr, EndpointId, RelayMode, RelayUrl, SecretKey,
-    TransportAddr,
+    endpoint::{presets, Connection},
+    Endpoint, EndpointAddr, EndpointId, RelayMode, RelayUrl, SecretKey, TransportAddr,
 };
 use pigdef::config::HardwareConfigMessage::Disconnect;
 use pigdef::config::{HardwareConfig, HardwareConfigMessage};
@@ -41,14 +41,17 @@ pub async fn send_config_message(
 }
 
 /// Connect to an Iroh-Net node using the [NodeId] and an optional [RelayUrl]
+///
+/// Returns the Endpoint along with the connection — the Endpoint must be kept
+/// alive for as long as the Connection is in use.
 pub async fn connect(
     endpoint_id: &EndpointId,
     relay: &Option<RelayUrl>,
-) -> anyhow::Result<(HardwareDescription, HardwareConfig, Connection)> {
+) -> anyhow::Result<(HardwareDescription, HardwareConfig, Connection, Endpoint)> {
     let secret_key = SecretKey::generate(&mut rand::rng());
 
     // Build an `Endpoint`, which uses PublicKeys as node identifiers
-    let endpoint = Endpoint::builder()
+    let endpoint = Endpoint::builder(presets::N0)
         // The secret key is used to authenticate with other nodes.
         .secret_key(secret_key)
         // Set the ALPN protocols this endpoint will accept on incoming connections
@@ -75,7 +78,7 @@ pub async fn connect(
     let message = gui_receiver.read_to_end(4096).await?;
     let reply: (HardwareDescription, HardwareConfig) = postcard::from_bytes(&message)?;
 
-    Ok((reply.0, reply.1, connection))
+    Ok((reply.0, reply.1, connection, endpoint))
 }
 
 /// Inform the device that we are disconnecting from the Iroh connection and close it

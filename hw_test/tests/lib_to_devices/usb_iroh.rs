@@ -19,7 +19,7 @@ where
     Fut: Future<Output = ()>,
 {
     match iroh_host::connect(endpoint_id, relay_url).await {
-        Ok((hw_desc, hw_config, connection)) => {
+        Ok((hw_desc, hw_config, connection, _endpoint)) => {
             assert!(
                 hw_desc.details.model.contains("Pi"),
                 "Didn't connect to fake hardware pigglet"

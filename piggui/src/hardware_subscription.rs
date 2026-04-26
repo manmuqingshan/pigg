@@ -38,7 +38,7 @@ use iced::stream;
 #[cfg(any(feature = "iroh", feature = "tcp", feature = "usb"))]
 use iced::{futures, futures::pin_mut};
 #[cfg(feature = "iroh")]
-use iroh::endpoint::Connection;
+use iroh::{endpoint::Connection, Endpoint};
 #[cfg(feature = "usb")]
 use log::info;
 use pigdef::description::BCMPinNumber;
@@ -96,7 +96,7 @@ enum HWState {
     ConnectedUsb(UsbConnection),
     #[cfg(feature = "iroh")]
     /// The subscription is ready and will listen for config events on the channel contained
-    ConnectedIroh(Connection),
+    ConnectedIroh(Connection, Endpoint),
     #[cfg(feature = "tcp")]
     /// The subscription is ready and will listen for config events on the channel contained
     ConnectedTcp(async_std::net::TcpStream),
@@ -111,7 +111,7 @@ impl fmt::Display for HWState {
             #[cfg(feature = "usb")]
             ConnectedUsb(_) => write!(f, "ConnectedUsb"),
             #[cfg(feature = "iroh")]
-            ConnectedIroh(_) => write!(f, "ConnectedIroh"),
+            ConnectedIroh(..) => write!(f, "ConnectedIroh"),
             #[cfg(feature = "tcp")]
             ConnectedTcp(_) => write!(f, "ConnectedTcp"),
         }
@@ -242,7 +242,12 @@ pub fn subscribe() -> impl Stream<Item = SubscriptionEvent> {
                             #[cfg(feature = "iroh")]
                             Iroh(endpoint_id, relay) => {
                                 match iroh_host::connect(&endpoint_id, &relay).await {
-                                    Ok((hardware_description, hardware_config, connection)) => {
+                                    Ok((
+                                        hardware_description,
+                                        hardware_config,
+                                        connection,
+                                        endpoint,
+                                    )) => {
                                         // Send the sender back to the GUI
                                         if let Err(e) = gui_sender_clone
                                             .send(SubscriptionEvent::Connected(
@@ -260,7 +265,7 @@ pub fn subscribe() -> impl Stream<Item = SubscriptionEvent> {
                                             .await;
                                         } else {
                                             // We are ready to receive messages from the GUI
-                                            state = ConnectedIroh(connection);
+                                            state = ConnectedIroh(connection, endpoint);
                                         }
                                     }
                                     Err(e) => {
@@ -399,7 +404,7 @@ pub fn subscribe() -> impl Stream<Item = SubscriptionEvent> {
                     }
 
                     #[cfg(feature = "iroh")]
-                    ConnectedIroh(connection) => {
+                    ConnectedIroh(connection, _endpoint) => {
                         let mut connection_clone = connection.clone();
                         let fused_wait_for_remote_message =
                             iroh_host::wait_for_remote_message(&mut connection_clone).fuse();
